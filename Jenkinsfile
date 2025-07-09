@@ -71,4 +71,14 @@ pipeline {
             }
         }
     }
+
+    post {
+        failure {
+            emailext (
+                to: 'contact@a5project.com',
+                subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: "Build failed. Check console: ${env.BUILD_URL}"
+            )
+        }
+    }
 }
