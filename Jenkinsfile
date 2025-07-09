@@ -9,7 +9,6 @@ pipeline {
         // Use local workspace for Cypress cache
         CYPRESS_CACHE_FOLDER = "${WORKSPACE}/.cache/Cypress"
         NODE_ENV = 'test'
-        FORCE_COLOR = '0'
     }
 
     options {
@@ -47,7 +46,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh 'FORCE_COLOR=0 npx cypress run'
+                sh 'npm run cy:run'
             }
         }
 

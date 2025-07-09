@@ -5,7 +5,7 @@
   "scripts": {
     "cy:open": "cypress open",
     "cy:verify": "cypress verify",
-    "cy:run": "cypress run",
+    "cy:run": "cypress run --no-color",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
