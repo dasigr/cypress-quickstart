@@ -37,9 +37,7 @@ pipeline {
                     )
                 ]) {
                     echo 'Building the application...'
-                    // sh 'npm install --force'
-                    // aka `next build`
-                    sh "npm run build"
+                    sh "npm run cy:verify"
                 }
             }
         }
@@ -47,6 +45,7 @@ pipeline {
         stage("Test") {
             steps {
                 echo 'Testing the application...'
+                sh "npm run cy:run"
             }
         }
         
