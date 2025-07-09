@@ -9,6 +9,7 @@ pipeline {
         // Use local workspace for Cypress cache
         CYPRESS_CACHE_FOLDER = "${WORKSPACE}/.cache/Cypress"
         NODE_ENV = 'test'
+        NO_COLOR = 'true'
     }
 
     options {
@@ -39,7 +40,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm ci --no-color'
+                sh 'npm ci'
                 sh 'npx cypress install' // Ensures binary is present
                 sh 'npm run cy:verify'
             }
