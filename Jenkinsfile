@@ -1,57 +1,72 @@
 pipeline {
-    
     agent {
         docker {
-            image 'node:22.14.0'
+            image 'cypress/browsers:22.14.0'
         }
     }
-    
+
+    environment {
+        // Use local workspace for Cypress cache
+        CYPRESS_CACHE_FOLDER = "${WORKSPACE}/.cache/Cypress"
+        NODE_ENV = 'test'
+        FORCE_COLOR = '0'
+    }
+
+    options {
+        // Keep only the latest 5 builds to avoid space issues
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+
     stages {
-        stage("Install Node packages") {
+        stage('Checkout') {
             steps {
-                // Writes lock-file to cache based on the GIT_COMMIT hash
-                writeFile file: "next-lock.cache", text: "$GIT_COMMIT"
-         
-                cache(caches: [
-                    arbitraryFileCache(
-                        path: "node_modules",
-                        includes: "**/*",
-                        cacheValidityDecidingFile: "package-lock.json"
-                    )
-                ]) {
-                    sh "npm install"
+                checkout scm
+            }
+        }
+
+        stage('Restore Cypress Cache') {
+            steps {
+                script {
+                    // Restore Cypress cache if previously archived
+                    if (fileExists("${WORKSPACE}/cypress-cache.tar.gz")) {
+                        sh """
+                            mkdir -p ~/.cache
+                            tar -xzf cypress-cache.tar.gz -C ~/.cache
+                        """
+                    }
                 }
             }
         }
-        
-        stage("Build") {
+
+        stage('Install Dependencies') {
             steps {
-                // Writes lock-file to cache based on the GIT_COMMIT hash
-                writeFile file: "next-lock.cache", text: "$GIT_COMMIT"
-         
-                cache(caches: [
-                    arbitraryFileCache(
-                        path: ".next/cache",
-                        includes: "**/*",
-                        cacheValidityDecidingFile: "next-lock.cache"
-                    )
-                ]) {
-                    echo 'Building the application...'
-                    sh "npm run cy:verify"
-                }
+                sh 'npm ci'
+                sh 'npx cypress install' // Ensures binary is present
             }
         }
-        
-        stage("Test") {
+
+        stage('Run Tests') {
             steps {
-                echo 'Testing the application...'
-                sh "npm run cy:run"
+                sh 'FORCE_COLOR=0 npx cypress run'
             }
         }
-        
-        stage("Deploy") {
+
+        // stage('Save Cypress Cache') {
+        //     steps {
+        //         script {
+        //             sh """
+        //                 mkdir -p ~/.cache
+        //                 tar -czf cypress-cache.tar.gz -C ~/.cache Cypress
+        //             """
+        //             archiveArtifacts artifacts: 'cypress-cache.tar.gz', fingerprint: true
+        //         }
+        //     }
+        // }
+
+        stage('Archive Artifacts') {
             steps {
-                echo 'Deploying the appliation...'
+                archiveArtifacts artifacts: 'cypress/videos/**/*', allowEmptyArchive: true
+                archiveArtifacts artifacts: 'cypress/screenshots/**/*', allowEmptyArchive: true
             }
         }
     }
