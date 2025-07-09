@@ -39,8 +39,9 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm ci'
+                sh 'npm ci --no-color'
                 sh 'npx cypress install' // Ensures binary is present
+                sh 'npm run cy:verify'
             }
         }
 
