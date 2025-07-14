@@ -1,5 +1,5 @@
 # Use official Node.js base image
-FROM cypress/browsers:22.14.0
+FROM node:22.14.0
 
 # Set working directory in container
 WORKDIR /app

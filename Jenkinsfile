@@ -1,14 +1,11 @@
 pipeline {
     agent {
         docker {
-            image 'dasigr/cypress-quickstart'
+            image 'cypress/browsers:22.14.0'
         }
     }
 
     environment {
-        IMAGE_NAME = 'dasigr/cypress-quickstart'
-        REGISTRY_CREDENTIALS = 'docker-hub'
-
         // Use local workspace for Cypress cache
         CYPRESS_CACHE_FOLDER = "${WORKSPACE}/.cache/Cypress"
         NODE_ENV = 'test'
@@ -24,16 +21,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    def shortCommit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                    env.IMAGE_TAG = "${shortCommit}"
-                    // sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                }
             }
         }
 
@@ -83,32 +70,9 @@ pipeline {
                 archiveArtifacts artifacts: 'cypress/screenshots/**/*', allowEmptyArchive: true
             }
         }
-
-        // stage('Login to Docker Registry') {
-        //     steps {
-        //         script {
-        //             docker.withRegistry('https://index.docker.io/v1/', REGISTRY_CREDENTIALS) {
-        //                 echo 'Logged in to Docker Hub'
-        //             }
-        //         }
-        //     }
-        // }
-
-        // stage('Push Docker Image') {
-        //     steps {
-        //         script {
-        //             docker.withRegistry('https://index.docker.io/v1/', REGISTRY_CREDENTIALS) {
-        //                 sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
-        //             }
-        //         }
-        //     }
-        // }
     }
 
     post {
-        success {
-            echo "Image pushed: ${IMAGE_NAME}:${IMAGE_TAG}"
-        }
         failure {
             emailext (
                 to: 'contact@a5project.com',
