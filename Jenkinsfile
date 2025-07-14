@@ -46,6 +46,15 @@ pipeline {
             }
         }
 
+        stage('Build') {
+            steps {
+                sh 'docker image ls'
+                sh 'docker build --platform linux/amd64 -t cypress-quickstart:latest .'
+                sh 'docker image ls'
+
+            }
+        }
+
         stage('Run Tests') {
             steps {
                 sh 'npm run cy:run'
