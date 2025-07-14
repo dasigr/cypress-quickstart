@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'dasigr/cypress-quickstart'
+        }
+    }
 
     environment {
         IMAGE_NAME = 'dasigr/cypress-quickstart'
